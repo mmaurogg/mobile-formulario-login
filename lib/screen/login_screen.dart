@@ -1,14 +1,16 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:formularios_app/provider/login_form_provider.dart';
 import 'package:formularios_app/widgets/widgets.dart';
 import 'package:formularios_app/ui/input_decorations.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: AuthBackground(
         child: SingleChildScrollView(
@@ -23,7 +25,12 @@ class LoginScreen extends StatelessWidget {
                     Text('Login', style: Theme.of(context).textTheme.headline4,),
 
                     SizedBox(height: 30),
-                    _LoginForm(),
+
+                    //Crea una instancia del login form provider que puede redibujar widges en este scope
+                    ChangeNotifierProvider(
+                      create: (_) => LoginFormProvider(),
+                      child: _LoginForm(),
+                    ),
 
                   ],
                 ),
@@ -47,9 +54,16 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final loginForm = Provider.of<LoginFormProvider>(context);
+
     return Container(
       child: Form(
-        //TODO mantener la referencia aqui
+        // indicar a que key apunta
+        key: loginForm.formKey,
+
+        // disparador de la validacion
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
             TextFormField(
@@ -60,6 +74,20 @@ class _LoginForm extends StatelessWidget {
                 labelText: 'Correo electrónico',
                 prefixIcon: Icons.alternate_email_rounded
               ),
+              // agregar los valores del formulario a las variables
+              onChanged: (value) => loginForm.email = value,
+
+              // el Key del formulario nos dirá si este es valido o no (null es que paso)
+              validator: (value){
+
+                String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                RegExp regExp  = new RegExp(pattern);
+
+                //null significa que el formulario paso bien
+                return regExp.hasMatch(value ?? '')
+                ? null
+                : 'Este valor no luce como un correo';
+              },
             ),
             SizedBox(height: 30),
 
@@ -72,6 +100,12 @@ class _LoginForm extends StatelessWidget {
                   labelText: 'Contraseña',
                   prefixIcon: Icons.lock_outline
               ),
+              onChanged: (value) => loginForm.password = value,
+              validator: (value){
+                return (value != null && value.length >= 6)
+                    ? null
+                    : 'La contraseña debe ser de mínimo 6 caracteres';
+              },
             ),
             SizedBox(height: 30),
             
@@ -83,12 +117,29 @@ class _LoginForm extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                 child: Text(
-                  'Ingresar',
+                  loginForm.isLoading
+                      ? 'Espere'
+                      : 'Ingresar',
                   style: TextStyle( color: Colors.white)
                 ),
               ),
-              onPressed: () {
-                //TODO: login
+              onPressed: loginForm.isLoading ? null: () async {
+
+                // Quitar el teclado
+                FocusScope.of(context).unfocus();
+
+
+                if(!loginForm.isValidform()) return ;
+
+                loginForm.isLoading = true;
+
+                // fingir un delay
+                await Future.delayed(Duration(seconds: 2));
+                //TODO: aca se usa un backen para verificar la informacion
+                loginForm.isLoading = false;
+
+                Navigator.pushReplacementNamed(context, 'home');
+
             },)
           ],
         ),
