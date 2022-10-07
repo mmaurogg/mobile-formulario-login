@@ -1,9 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:formularios_app/screen/screens.dart';
+import 'package:formularios_app/services/products_service.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp( AppState());
 }
+
+class AppState extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+        providers: [
+
+          ChangeNotifierProvider(
+            // que lo lea de product services
+            // se inicializara en home screen
+            create: (_) => ProductsService(),
+            // falso: dispara cuando el prodict service es creado
+            // verdadero: cuando se necesite que se llame (está por defecto)
+            lazy: true,
+          )
+        ],
+      child: MyApp(),
+    );
+  }
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,13 +37,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Productos App',
-      initialRoute: 'login',
+      initialRoute: 'home',
       routes: {
         'login': (_) => LoginScreen(),
         'home': (_) => HomeScreen(),
+        'product': (_) => ProductScreen(),
       },
       theme: ThemeData.light().copyWith(
-        scaffoldBackgroundColor: Colors.grey[300]
+        scaffoldBackgroundColor: Colors.grey[300],
+          appBarTheme: AppBarTheme(
+          elevation: 0,
+          color: Colors.indigo,
+        ),
+
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.indigo,
+          elevation: 0,
+        ),
       ),
     );
   }
