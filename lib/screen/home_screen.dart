@@ -22,7 +22,11 @@ class HomeScreen extends StatelessWidget {
       body: ListView.builder(
         itemCount: productService.products.length,
         itemBuilder: (context, index) => GestureDetector(
-            onTap: () => Navigator.pushNamed(context,'product'),
+            onTap: () {
+              //Uso mi metodo copy para crear una copy y romeper la referencia (solo afectar el producto select)
+              productService.selectedProduct = productService.products[index].copy();
+              Navigator.pushNamed(context, 'product');
+            },
             child: ProductCard(
               product: productService.products[index],
             )

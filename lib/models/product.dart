@@ -32,4 +32,13 @@ class Product {
     "picture": picture,
     "price": price,
   };
+
+  //Metodo pra entregar una copia de sí mismo
+  Product copy() => Product(
+      id: id,
+      available: available,
+      name: name,
+      picture: picture,
+      price: price
+  );
 }
