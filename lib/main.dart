@@ -39,13 +39,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Productos App',
-      initialRoute: 'login',
+      initialRoute: 'cheking',
       routes: {
-        'login': (_) => LoginScreen(),
+        'cheking': (_) => CheckAuthScreen(),
+
         'home': (_) => HomeScreen(),
         'product': (_) => ProductScreen(),
+
+        'login': (_) => LoginScreen(),
         'register': (_) => RegisterScreen(),
+
       },
+      scaffoldMessengerKey: NotificationsService.messengerKey,
       theme: ThemeData.light().copyWith(
         scaffoldBackgroundColor: Colors.grey[300],
           appBarTheme: AppBarTheme(
