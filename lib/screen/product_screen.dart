@@ -4,7 +4,7 @@ import 'package:formularios_app/provider/provider.dart';
 import 'package:formularios_app/services/services.dart';
 import 'package:formularios_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
-
+import 'package:image_picker/image_picker.dart';
 import '../ui/input_decorations.dart';
 
 class ProductScreen extends StatelessWidget {
@@ -13,11 +13,11 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final prodductService = Provider.of<ProductsService>(context);
+    final productService = Provider.of<ProductsService>(context);
 
     return ChangeNotifierProvider(
-      create: ( _ ) => ProductFormProvider(prodductService.selectedProduct),
-      child: _ProductScreenBody(prodductService: prodductService),
+      create: ( _ ) => ProductFormProvider(productService.selectedProduct),
+      child: _ProductScreenBody(productService: productService),
 
     ) ;
   }
@@ -26,10 +26,10 @@ class ProductScreen extends StatelessWidget {
 class _ProductScreenBody extends StatelessWidget {
   const _ProductScreenBody({
     Key? key,
-    required this.prodductService,
+    required this.productService,
   }) : super(key: key);
 
-  final ProductsService prodductService;
+  final ProductsService productService;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _ProductScreenBody extends StatelessWidget {
           children: [
             Stack(
               children: [
-                ProductImage( url: prodductService.selectedProduct.picture ),
+                ProductImage( url: productService.selectedProduct.picture ),
 
                 Positioned(
                   top: 60,
@@ -60,8 +60,21 @@ class _ProductScreenBody extends StatelessWidget {
                     top: 60,
                     right: 20,
                     child: IconButton(
-                      onPressed: () {
-                        //TODO: camara o galeria
+                      onPressed: () async {
+                        //TODO: menu para subir o tomar foto
+                        final ImagePicker _picker = ImagePicker();
+                        // Pick an image
+                        //final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+                        // Capture a photo
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
+
+                        if (pickedFile == null) {
+                          print('No hay seleccion');
+                          return;
+                        }
+
+                        productService.updateSelectedProductImage( pickedFile.path);
+
                       },
                       icon: Icon(Icons.camera_alt_outlined, size: 40, color: Colors.white,),
                     )
@@ -79,13 +92,29 @@ class _ProductScreenBody extends StatelessWidget {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
-        child: Icon( Icons.save_outlined),
-        onPressed: () async {
+        child:  productService.isSaving
+          ? CircularProgressIndicator(color: Colors.white,)
+          : Icon( Icons.save_outlined),
+        onPressed: productService.isSaving
+        ? null
+        : () async {
 
-         if ( !productForm.isValidForm() ) return ;
+            if ( !productForm.isValidForm() ) return ;
 
-         await prodductService.saveOrCreateProdut(productForm.product);
-        },
+            final String? imageUrl = await productService.uploadImage();
+
+            if( imageUrl != null ){
+              productForm.product.picture = imageUrl;
+            }
+
+            await productService.saveOrCreateProduct(productForm.product);
+            //    .then( (_) => Navigator.pop(context));
+
+            //Navigator.pop(context);
+
+            //TODO: mensaje que se guardó correctamente
+
+          },
       ),
     );
   }

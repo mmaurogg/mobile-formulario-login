@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:formularios_app/models/models.dart';
@@ -12,6 +13,8 @@ class ProductsService extends ChangeNotifier {
 
   bool isLoading = true;
   bool isSaving = false;
+
+  File? newPictureFile;
 
   ProductsService(){
     loadProducts();
@@ -43,12 +46,12 @@ class ProductsService extends ChangeNotifier {
     
   }
 
-  Future saveOrCreateProdut( Product product ) async {
+  Future saveOrCreateProduct( Product product ) async {
     isSaving = true;
     notifyListeners();
 
     if ( product.id == null){
-      // TODO: crear
+      await createProduct( product );
     } else {
       await updateProduct(product);
     }
@@ -73,6 +76,58 @@ class ProductsService extends ChangeNotifier {
 
   }
 
+  Future<String> createProduct( Product product ) async {
+    final url = Uri.https(_baseUrl, 'products.json');
+    final resp = await http.post( url, body: product.toJson() );
+    final decodedData = jsonDecode( resp.body );
+
+    product.id = decodedData['name'];
+
+    products.add(product);
+
+    return product.id!;
+
+  }
+
+  // se usa para mostrar la imagen seleccionada sin guardarla
+  void updateSelectedProductImage( String path){
+
+    selectedProduct.picture = path;
+    newPictureFile = File.fromUri(Uri(path: path));
+
+    notifyListeners();
+  }
+
+  Future<String?> uploadImage() async {
+    if(newPictureFile == null) return null;
+
+    isSaving = true;
+    notifyListeners();
+
+    final url = Uri.parse('https://api.cloudinary.com/v1_1/dglciigcq/image/upload?upload_preset=txwaxpuw');
+    // creamos la petición
+    final imageUploadRequest = http.MultipartRequest('PUT', url);
+    // adjuntamos el file
+    final file = await http.MultipartFile.fromPath('file', newPictureFile!.path );
+
+    imageUploadRequest.files.add(file);
+    //realizar la peticion
+    final streamResponse = await imageUploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+
+    if( resp.statusCode != 200 && resp.statusCode != 201){
+      print('Algo salió mal');
+      print( resp.body );
+      return null;
+    }
+
+    newPictureFile = null;
+
+    final decodeData = json.decode(resp.body);
+    print(resp.body);
+    return decodeData['secure_url'];
+
+  }
 
 
 }

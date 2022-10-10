@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:formularios_app/models/models.dart';
 import 'package:formularios_app/screen/screens.dart';
 import 'package:formularios_app/services/services.dart';
 import 'package:formularios_app/widgets/widgets.dart';
@@ -37,6 +38,11 @@ class HomeScreen extends StatelessWidget {
         child: Icon(Icons.add),
         onPressed: () {
 
+          productService.selectedProduct = new Product(
+              available: true,
+              name: '',
+              price: 0);
+          Navigator.pushNamed(context, 'product');
         },
       ),
 

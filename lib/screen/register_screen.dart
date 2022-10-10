@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:formularios_app/provider/login_form_provider.dart';
-import 'package:formularios_app/services/services.dart';
+import 'package:formularios_app/services/auth_service.dart';
 import 'package:formularios_app/widgets/widgets.dart';
 import 'package:formularios_app/ui/input_decorations.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     SizedBox(height: 10),
-                    Text('Login', style: Theme.of(context).textTheme.headline4,),
+                    Text('Crear cuenta', style: Theme.of(context).textTheme.headline4,),
 
                     SizedBox(height: 30),
 
@@ -40,15 +40,16 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 50),
 
               TextButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, 'register'),
+                onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
                 style: ButtonStyle(
-                  overlayColor: MaterialStateProperty.all( Colors.indigo.withOpacity(0.1)),
-                  shape: MaterialStateProperty.all( StadiumBorder())
+                    overlayColor: MaterialStateProperty.all( Colors.indigo.withOpacity(0.1)),
+                    shape: MaterialStateProperty.all( StadiumBorder())
                 ),
-                child: Text('Crear una nueva cuenta', style: TextStyle( fontSize: 18, color: Colors.black87),),
+                child: Text('¿Ya tienes una cuenta?', style: TextStyle( fontSize: 18, color: Colors.black87),),
               ),
 
-              SizedBox( height:  50,),
+              SizedBox(height: 500),
+
 
             ],
           ),
@@ -147,7 +148,7 @@ class _LoginForm extends StatelessWidget {
                 //await Future.delayed(Duration(seconds: 2));
 
                 //aca se usa un backen para verificar la informacion
-                final String? errorMessage = await authService.login(loginForm.email, loginForm.password);
+                final String? errorMessage = await authService.createUser(loginForm.email, loginForm.password);
 
                 if ( errorMessage == null) {
                   Navigator.pushReplacementNamed(context, 'home');
