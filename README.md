@@ -1,4 +1,4 @@
-# Formularios App
+# Productos App
 
 Es un proyecto realizado en Flutter de tipo académico, el cual consulta una base de datos en firebase y muestra todos los productos con sus características, este proyecto tambien cuenta con un login y una pantalla para ingresar nuevos productos (con o sin foto).
 
